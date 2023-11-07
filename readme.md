@@ -17,4 +17,4 @@ Connect for push buttons between ground and pins 13, 12, 11 and 10 of the Arduin
 
 ## How to run
 
-After installing everything, run '''node server.js''' and open '''localhost:3000''' in your browser.
+After installing everything, run `node server.js` and open `localhost:3000` in your browser.
