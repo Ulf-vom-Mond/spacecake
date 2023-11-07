@@ -13,7 +13,7 @@ const serial = new SerialPort({
 
 const port = 3000;
 
-app.use(express.static(path.join(__dirname, '.')));
+app.use(express.static(path.join(__dirname, './frontend')));
 
 app.listen(port, function(){
    console.log('Listening on port ' + port)
