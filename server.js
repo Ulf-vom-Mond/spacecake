@@ -25,7 +25,6 @@ app.get('/keys', function (req, res) {
     })
 });
 
-
 serial.on('data', function (data) {
   keys = data[data.length - 1]
 })
