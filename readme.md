@@ -13,7 +13,7 @@ You have to flash spacecake.ino onto an Arduino Uno or Nano, for example with Ar
 
 ### Hardware
 
-Connect for push buttons between ground and pins 13, 12, 11 and 10 of the Arduino.
+Connect four push buttons between ground and pins 13, 12, 11 and 10 of the Arduino.
 
 ## How to run
 
