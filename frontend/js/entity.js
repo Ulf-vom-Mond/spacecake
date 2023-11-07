@@ -10,8 +10,8 @@ class Entity{
 
 	transInertia = 1;
 	rotInertia = 1;
-	transFriction = 1;
-	rotFriction = 1;
+	transFriction = 0;
+	rotFriction = 0;
 
 	constructor(x, y, radius, angle) {
 		this.x = x;
@@ -40,8 +40,17 @@ class Entity{
 		this.xVelocity += x / this.transInertia * dt * amount
         this.yVelocity += y / this.transInertia * dt * amount
         this.angularVelocity += angle / this.rotInertia * dt * amount
+	}
 
-        this.x += this.xVelocity * dt;
+	update(dt) {
+		var force = [0, 0, 0]
+        force[0] -= Math.sign(this.xVelocity) * Math.pow(this.xVelocity, 2) * this.transFriction;
+        force[1] -= Math.sign(this.yVelocity) * Math.pow(this.yVelocity, 2) * this.transFriction;
+        force[2] -= Math.sign(this.angularVelocity) * Math.pow(this.angularVelocity, 2) * this.rotFriction;
+
+        this.push(force[0], force[1], force[2], 1, dt);
+
+		this.x += this.xVelocity * dt;
         this.y += this.yVelocity * dt;
         this.angle += this.angularVelocity * dt;
 	}

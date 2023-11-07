@@ -10,9 +10,6 @@ class Spacecraft extends Entity {
 
 	steer(buttons, context, elapsed) {
 		var force = [0, 0, 0]
-        force[0] -= Math.sign(this.xVelocity) * Math.pow(this.xVelocity, 2) * this.transFriction;
-        force[1] -= Math.sign(this.yVelocity) * Math.pow(this.yVelocity, 2) * this.transFriction;
-        force[2] -= Math.sign(this.angularVelocity) * Math.pow(this.angularVelocity, 2) * this.rotFriction;
 
         for(var i = 0; i < this.thrusters.length; i++) {
 	        var thruster = this.thrusters[i]
@@ -29,5 +26,6 @@ class Spacecraft extends Entity {
 	    }
 
         this.push(force[0], force[1], force[2], 1, elapsed);
+        this.update(elapsed);
 	}
 }

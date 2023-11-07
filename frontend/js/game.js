@@ -6,6 +6,7 @@ class Game {
     context;
     updateInterval;
     last_update = 0;
+    score = 0;
 
     width = window.innerWidth;
     height = window.innerHeight;
@@ -36,7 +37,7 @@ class Game {
 	        this.asteroidImgs[i].src = asteroidImgSrcs[i];
 	    }
 
-	    for (var i = 500; i < this.width; i += this.nextObstacle()) {
+	    for (var i = 800; i < this.width; i += this.nextObstacle(2)) {
 	        this.obstacles.push(new Asteroid(i, Math.random()*this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5)));
 	    }
 
@@ -52,8 +53,10 @@ class Game {
         this.context.drawImage(this.bgImg, Math.floor(this.bgspeed*this.spacecraft.x/this.bgImg.width)*this.bgImg.width-this.width+this.spacecraft.x*(1-this.bgspeed), 0, this.bgImg.width, this.height);
         this.context.drawImage(this.bgImg, Math.floor(this.bgspeed*this.spacecraft.x/this.bgImg.width)*this.bgImg.width-this.width+this.bgImg.width-1+this.spacecraft.x*(1-this.bgspeed), 0, this.bgImg.width, this.height);
 
+        this.score = ((this.spacecraft.x - this.xpos)/100).toFixed(2);
+
         this.createObstacles();
-        this.refreshObstacles();
+        this.refreshObstacles(elapsed);
         this.checkGameOver();
         this.printScore();
 
@@ -95,7 +98,7 @@ class Game {
 	printScore() {
 		this.context.font = "30px Arial";
         this.context.fillStyle = "white"
-        this.context.fillText(((this.spacecraft.x - this.xpos)/100).toFixed(2), this.spacecraft.x - this.xpos + 10, 50);
+        this.context.fillText(this.score, this.spacecraft.x - this.xpos + 10, 50);
         this.context.font = "15px Arial";
         this.context.fillText("lightyears away from home", this.spacecraft.x - this.xpos + 10, 70);
 	}
@@ -103,11 +106,15 @@ class Game {
 	createObstacles() {
 		var lastObstacle = this.obstacles[this.obstacles.length-1].x;
         if(lastObstacle < this.spacecraft.x + this.width) {
-            this.obstacles.push(new Asteroid(lastObstacle + this.nextObstacle(), Math.random()*this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5)));
+        	var newObstacle = new Asteroid(lastObstacle + this.nextObstacle(this.score / 10 + 6), Math.random()*this.height*3-this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5));
+            newObstacle.xVelocity = (Math.random()-0.5)*0.001*this.score;
+            newObstacle.yVelocity = (Math.random()-0.5)*0.001*this.score;
+            newObstacle.angularVelocity = (Math.random()-0.5)*0.001;
+            this.obstacles.push(newObstacle);
         }
 	}
 
-	refreshObstacles() {
+	refreshObstacles(elapsed) {
 		for (var i = 0; i < this.obstacles.length; i++) {
             if(this.obstacles[i].x + this.obstacles[i].radius < this.spacecraft.x - this.xpos) {
                 this.obstacles.splice(i, 1);
@@ -115,11 +122,12 @@ class Game {
                 continue;
             }
 
+            this.obstacles[i].update(elapsed);
             this.obstacles[i].draw(this.context, this.asteroidImgs[this.obstacles[i].texture]);
         }
 	}
 
-	nextObstacle(){
-	    return Math.random()*300+100;
+	nextObstacle(density){
+	    return Math.random()*this.width/density*2;
 	}
 }
