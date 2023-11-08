@@ -28,4 +28,8 @@ class Spacecraft extends Entity {
         this.push(force[0], force[1], force[2], 1, elapsed);
         this.update(elapsed);
 	}
+
+	explode(context, elapsed) {
+
+	}
 }

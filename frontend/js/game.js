@@ -2,11 +2,13 @@ class Game {
 	keys = 0;
 	xpos = 300;
 	bgspeed = 0.3;
-	obstacles = []
+	obstacles = [];
+	canvas;
     context;
     updateInterval;
     last_update = 0;
     score = 0;
+    gameState = 0;
 
     width = window.innerWidth;
     height = window.innerHeight;
@@ -16,6 +18,8 @@ class Game {
     asteroidImgs = [];
     bgImg = new Image();
 
+    explosionAnimation;
+
 	constructor() {
 	    this.bgImg.src = "/img/background.png";
 
@@ -24,8 +28,9 @@ class Game {
 	    var asteroidImgSrcs = ["/img/asteroid_25.png", "/img/asteroid_50.png", "/img/asteroid_100.png", "/img/asteroid_150.png", "/img/asteroid_200.png"];
 
 	    this.last_update = new Date();
-	    var canvas = document.getElementById("canvas");
+	    this.canvas = document.getElementById("canvas");
 	    this.context = canvas.getContext("2d");
+	    this.explosionAnimation = new Animation("/img/explosion", this.context, 3, 20, 46);
 
     	canvas.width = this.width;
     	canvas.height = this.height;
@@ -48,16 +53,23 @@ class Game {
 		var elapsed = new Date() - this.last_update;
         this.last_update = new Date();
         this.context.save();
-        
+        // if(this.gameState) {
+		// 	this.context.translate((Math.random()-0.5)*6, (Math.random()-0.5)*6);
+		// 	this.context.rotate((Math.random()-0.5)*0.15);
+        // }
         this.context.clearRect(this.spacecraft.x - this.xpos, 0, this.width, this.height);
         this.context.drawImage(this.bgImg, Math.floor(this.bgspeed*this.spacecraft.x/this.bgImg.width)*this.bgImg.width-this.width+this.spacecraft.x*(1-this.bgspeed), 0, this.bgImg.width, this.height);
         this.context.drawImage(this.bgImg, Math.floor(this.bgspeed*this.spacecraft.x/this.bgImg.width)*this.bgImg.width-this.width+this.bgImg.width-1+this.spacecraft.x*(1-this.bgspeed), 0, this.bgImg.width, this.height);
+
+        
 
         this.score = ((this.spacecraft.x - this.xpos)/100).toFixed(2);
 
         this.createObstacles();
         this.refreshObstacles(elapsed);
-        this.checkGameOver();
+        if(!this.gameState) {
+        	this.checkGameOver();
+        }
         this.printScore();
 
         this.context.translate(this.spacecraft.x, this.spacecraft.y);
@@ -65,14 +77,25 @@ class Game {
         
         this.context.drawImage(this.spacecraftImg, -this.spacecraftImg.width/2, -this.spacecraftImg.height/2, this.spacecraftImg.width, this.spacecraftImg.height);
 
-        this.apiCall();
-        this.spacecraft.steer(this.keys, this.context, elapsed);
+        if(!this.gameState) {
+	        this.getKeys();
+	        this.spacecraft.steer(this.keys, this.context, elapsed);
+	    }
 
         this.context.restore();
-        this.context.translate(-this.spacecraft.xVelocity * elapsed, 0);
+        if(this.gameState) {
+			this.explosionAnimation.drawFrame(this.spacecraft.x-this.spacecraft.radius/2, this.spacecraft.y-this.explosionAnimation.getHeight());
+        }
+        if(!this.gameState) {
+        	this.context.translate(-this.spacecraft.xVelocity * elapsed, 0);
+        }
 	}
 
-	async apiCall() {
+	explosion(context, x, y) {
+		
+	}
+
+	async getKeys() {
 		try {
 			var response = await fetch("/keys");
 			var obj = await response.json();
@@ -86,13 +109,19 @@ class Game {
 	checkGameOver() {
 		for (var i = 0; i < this.obstacles.length; i++) {
             if(this.spacecraft.isColliding(this.obstacles[i])) {
-                clearInterval(this.updateInterval)
+                this.gameOver();
             }
         }
 
         if(this.spacecraft.y < -80 || this.spacecraft.y > this.height+80) {
-            clearInterval(this.updateInterval)
+            this.gameOver();
         }
+	}
+
+	gameOver() {
+		this.gameState = 1;
+		//clearInterval(this.updateInterval);
+		//setInterval(this.explosion.bind(this), 40);
 	}
 
 	printScore() {
@@ -128,6 +157,6 @@ class Game {
 	}
 
 	nextObstacle(density){
-	    return Math.random()*this.width/density*2;
+	    return Math.random()*this.width/density*2+50;
 	}
 }

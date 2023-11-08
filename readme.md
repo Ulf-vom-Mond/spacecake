@@ -3,7 +3,7 @@
 ## Installation
 ### Node.js
 
-You need to install Node.js with the following packets:
+You need to install Node.js with the following packages:
 - serialport
 - express
 
