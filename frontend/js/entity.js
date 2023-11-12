@@ -28,12 +28,24 @@ class Entity{
 		context.restore();
 	}
 
-	distance(foreignEntity) {
+	centerDist(foreignEntity) {
 		return Math.sqrt(Math.pow(this.x - foreignEntity.x, 2) + Math.pow(this.y - foreignEntity.y, 2));
 	}
 
+	distance(foreignEntity) {
+		return Math.sqrt(Math.pow(this.x - foreignEntity.x, 2) + Math.pow(this.y - foreignEntity.y, 2)) - this.radius - foreignEntity.radius;
+	}
+
 	isColliding(foreignEntity) {
-		return this.distance(foreignEntity) < this.radius + foreignEntity.radius;
+		return this.distance(foreignEntity) < 0;
+	}
+
+	getRelativeSpeed(foreignEntity) {
+		return Math.sqrt(Math.pow(this.xVelocity - foreignEntity.xVelocity, 2) + Math.pow(this.yVelocity - foreignEntity.yVelocity, 2))
+	}
+
+	getSpeed() {
+		return Math.sqrt(Math.pow(this.xVelocity, 2) + Math.pow(this.yVelocity, 2))
 	}
 
 	push(x, y, angle, amount, dt) {

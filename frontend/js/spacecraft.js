@@ -1,11 +1,11 @@
 class Spacecraft extends Entity {
 	transInertia = 3000;
 	rotInertia = 100000;
-	transFriction = 5;
+	transFriction = 3;
 	rotFriction = 10000;
 	thrusters = [new Thruster(-50, -30, -Math.PI/4*5), 
-		         new Thruster(-40, 20, Math.PI/12),
-		         new Thruster(40, 20, -Math.PI/12),
+		         new Thruster(-40, 20, Math.PI/6),
+		         new Thruster(40, 20, -Math.PI/6),
 		         new Thruster(50, -30, Math.PI/4*5)]
 
 	steer(buttons, context, elapsed) {
@@ -31,5 +31,14 @@ class Spacecraft extends Entity {
 
 	explode(context, elapsed) {
 
+	}
+
+	reset(x, y, angle) {
+		this.x = x;
+		this.y = y;
+		this.angle = angle;
+		this.xVelocity = 0;
+		this.yVelocity = 0;
+		this.angularVelocity = 0;
 	}
 }

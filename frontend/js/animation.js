@@ -49,4 +49,8 @@ class Animation {
 		}
 		return this.frames[this.frame].height*this.scale;
 	}
+
+	reset() {
+		this.frame = 0;
+	}
 }
