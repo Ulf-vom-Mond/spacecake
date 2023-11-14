@@ -7,6 +7,8 @@ class Rocket {
 	files = ["img/rocket_green.png", "img/rocket_blue.png", "img/rocket_red.png", "img/rocket_yellow.png"];
 	colors = ["green", "blue", "red", "yellow"];
 	image = new Image();
+	height = 0;
+	width = 0;
 
 	constructor(y, type, lim) {
 		this.y = y;
@@ -14,6 +16,8 @@ class Rocket {
 		this.ystart = y;
 		this.lim = lim;
 		this.image.src = this.files[type];
+		this.height = this.image.height;
+		this.width = this.image.width;
 	}
 
 	update(buttons, dt) {
@@ -28,21 +32,21 @@ class Rocket {
 			this.yVelocity = 0;
 			this.y = this.ystart;
 		}
-		// if(this.y < this.ystart - this.lim) {
-		// 	//this.y += dt;
-		// 	this.yVelocity = 0;
-		// 	this.y = this.ystart - this.lim;
-		// }
+		if(this.y < -this.height) {
+			//this.y += dt;
+			this.yVelocity = 0;
+			this.y = -this.height;
+		}
 	}
 
 	draw(x, context) {
-		context.drawImage(this.image, x, this.y, this.image.width, this.image.height);
+		context.drawImage(this.image, x-this.width/2, this.y, this.width, this.height);
 		context.fillStyle = this.colors[this.type];
-		context.fillRect(x+this.image.width/2-8, this.y+this.image.height, 16, this.ystart-this.y);
+		context.fillRect(x-8, this.y+this.height, 16, this.ystart-this.y);
 	}
 
 	hasFinished() {
-		return this.y < this.ystart - this.lim;
+		return this.y <= this.ystart - this.lim;
 	}
 
 	reset() {
