@@ -22,9 +22,9 @@ app.listen(port, function(){
   console.log('Listening on port ' + port)
 })
 
-app.get('/keys', function (req, res) {
+app.get('/buttons', function (req, res) {
   res.json({
-    keys: keys
+    buttons: keys
   })
 });
 

@@ -1,4 +1,5 @@
 class Game {
+	buttons = 0;
 	keys = 0;
 	xpos = 300;
 	bgspeed = 0.3;
@@ -104,7 +105,7 @@ class Game {
         this.context.translate(this.spacecraft.x, this.spacecraft.y);
         this.context.rotate(this.spacecraft.angle);
         this.context.drawImage(this.spacecraftImg, -this.spacecraftImg.width/2, -this.spacecraftImg.height/2, this.spacecraftImg.width, this.spacecraftImg.height);
-        this.spacecraft.steer(this.gameState == 0 ? this.keys : 0, this.context, elapsed);
+        this.spacecraft.steer(this.gameState == 0 ? this.buttons | this.keys : 0, this.context, elapsed);
 		this.context.restore();
 
         if(!this.gameState) { // game running
@@ -117,12 +118,12 @@ class Game {
 	    	this.explosionAnimation.drawFrame(this.spacecraft.x-this.spacecraft.radius/2, this.spacecraft.y-this.explosionAnimation.getHeight());
 	    	this.context.restore();
 	    	this.drawGameOverScreen();
-	    	var restart = false;
+	    	var restart = true;
 	    	for(var i = 0; i<4; i++) {
-	    		this.rockets[i].update(this.keys, elapsed);
+	    		this.rockets[i].update(this.buttons | this.keys, elapsed);
 	    		this.rockets[i].draw(this.viewPortX+this.width/2+(i-1.5)*100, this.context);
-	    		if(this.rockets[i].hasFinished()) {
-	    			restart = true;
+	    		if(!this.rockets[i].hasFinished()) {
+	    			restart = false;
 	    		}
 	    	}
 	    	if(restart) {
@@ -156,9 +157,9 @@ class Game {
 
 	async getKeys() {
 		try {
-			var response = await fetch("/keys");
+			var response = await fetch("/buttons");
 			var obj = await response.json();
-			this.keys = obj.keys;
+			this.buttons = obj.buttons;
 		}
 			catch (err) {
 			console.error(err.message, err);
@@ -269,4 +270,7 @@ class Game {
 		var date = new Date(timestamp);
 		return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth()+1).padStart(2, '0')}.${date.getFullYear()}`;
 	}
+
+
+	
 }
