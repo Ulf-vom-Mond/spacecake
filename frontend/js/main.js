@@ -19,5 +19,4 @@ function onKey(event, pressed, game) {
     if(event.key == "f") {
         game.keys = pressed & (1<<3 | game.keys) | ~pressed & (~(1<<3) & game.keys);
     }
-    console.log(game.keys);
 }

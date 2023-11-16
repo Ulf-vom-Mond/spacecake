@@ -53,9 +53,10 @@ class Game {
 	        this.asteroidImgs[i].src = asteroidImgSrcs[i];
 	    }
 
-	    for (var i = 800; i < this.width; i += this.nextObstacle(2)) {
-	        this.obstacles.push(new Asteroid(i, Math.random()*this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5)));
-	    }
+	    // for (var i = 800; i < this.width; i += this.nextObstacle(2)) {
+	    //     this.obstacles.push(new Asteroid(i, Math.random()*this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5)));
+	    // }
+	    this.createObstacles();
 
 	    for(var i = 0; i<4; i++) {
 	    	this.rockets.push(new Rocket(400, i, 100));
@@ -65,15 +66,15 @@ class Game {
 	}
 
 	restart() {
-		this.obstacles = [];
 		this.gameState = 0;
 		this.shakyshake = 0;
 		this.score = {rank: -1, score: 0, time: 0, date: 0};
 		this.spacecraftImg.src = "/img/spacecraft.png";
 
-		for (var i = 800; i < this.width; i += this.nextObstacle(2)) {
-	        this.obstacles.push(new Asteroid(i, Math.random()*this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5)));
-	    }
+		// for (var i = 800; i < this.width; i += this.nextObstacle(2)) {
+	    //     this.obstacles.push(new Asteroid(i, Math.random()*this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5)));
+	    // }
+	    
 
 	    for(var i = 0; i<4; i++) {
 	    	this.rockets[i].reset();
@@ -83,6 +84,9 @@ class Game {
 	    this.spacecraft.reset(this.xpos, this.height/2, Math.PI/2);
 	    this.explosionAnimation.reset();
 	    this.viewPortX = 0;
+
+	    this.obstacles = [];
+	    this.createObstacles();
 	}
 
 	update() {
@@ -239,12 +243,13 @@ class Game {
 	}
 
 	createObstacles() {
-		var lastObstacle = this.obstacles[this.obstacles.length-1].x;
-        if(lastObstacle < this.spacecraft.x + this.width) {
-        	var newObstacle = new Asteroid(lastObstacle + this.nextObstacle(this.score.score / 10 + 6), Math.random()*this.height*3-this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5));
-            newObstacle.xVelocity = (Math.random()-0.5)*0.001*this.score.score;
-            newObstacle.yVelocity = (Math.random()-0.5)*0.001*this.score.score;
-            newObstacle.angularVelocity = (Math.random()-0.5)*0.001;
+		var lastObstacle = this.obstacles.length ? this.obstacles[this.obstacles.length-1].x : 0;
+		var density = this.score.score / 40 + 4;
+		if(this.spacecraft.x + this.width - lastObstacle > this.width/density) {
+        	var newObstacle = new Asteroid(this.spacecraft.x + this.width, this.gaussianRandom(this.height/2, this.height/2), Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5));
+            newObstacle.xVelocity = this.gaussianRandom(0, 0.0003*this.score.score);// (Math.random()-0.5)*0.001*this.score.score;
+            newObstacle.yVelocity = this.gaussianRandom(0, 0.0003*this.score.score);//(Math.random()-0.5)*0.001*this.score.score;
+            newObstacle.angularVelocity = this.gaussianRandom(0, 0.001);//(Math.random()-0.5)*0.001;
             this.obstacles.push(newObstacle);
         }
 	}
@@ -256,6 +261,10 @@ class Game {
                 i--;
                 continue;
             }
+            if(this.obstacles[i].y + this.obstacles[i].radius < 0 || this.obstacles[i].y - this.obstacles[i].radius > this.height) {
+            	//this.obstacles[i].xVelocity *= -1;
+            	this.obstacles[i].yVelocity *= -1;
+            }
 
             this.obstacles[i].update(elapsed);
             this.obstacles[i].draw(this.context, this.asteroidImgs[this.obstacles[i].texture]);
@@ -263,7 +272,7 @@ class Game {
 	}
 
 	nextObstacle(density){
-	    return Math.random()*this.width/density*2+50;
+	    return Math.random()*this.width/density*0.3+50;
 	}
 
 	formatDate(timestamp) {
@@ -271,6 +280,14 @@ class Game {
 		return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth()+1).padStart(2, '0')}.${date.getFullYear()}`;
 	}
 
+	// Standard Normal variate using Box-Muller transform.
+	gaussianRandom(mean=0, stdev=1) {
+	    const u = 1 - Math.random(); // Converting [0,1) to (0,1]
+	    const v = Math.random();
+	    const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+	    // Transform to the desired mean and standard deviation:
+	    return z * stdev + mean;
+	}
 
 	
 }

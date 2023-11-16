@@ -56,7 +56,8 @@ serial.on('data', function (data) {
 })
 
 serial.on('error', function(err) {
-  console.log('Error: ', err.message)
+  console.error('Error: ', err.message)
+  console.log("try to use the keyboard (a, s, d and f)")
 })
 
 var fs = require('fs');
