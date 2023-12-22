@@ -22,6 +22,10 @@ class Spacecraft extends Entity {
 	            force[0] += Math.sin(absThrusterAngle);
 	            force[1] -= Math.cos(absThrusterAngle);
 	            force[2] -= Math.sin(thrusterAngle);
+
+	            thruster.addBurnTime(elapsed);
+	        } else {
+	        	thruster.resetBurnTime();
 	        }
 	    }
 
@@ -29,8 +33,12 @@ class Spacecraft extends Entity {
         this.update(elapsed);
 	}
 
-	explode(context, elapsed) {
-
+	get burnTimes() {
+		var burnTimes = [];
+		for(var i = 0; i < this.thrusters.length; i++) {
+			burnTimes.push(this.thrusters[i].burnTime);
+		}
+		return burnTimes;
 	}
 
 	reset(x, y, angle) {

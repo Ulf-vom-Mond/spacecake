@@ -26,7 +26,7 @@ class Game {
     rockets = [];
 
     highscores = [];
-    score = {rank: -1, score: 0, time: 0, date: 0};
+    score = {rank: -1, score: 0, bonus: 0, time: 0, date: 0};
 
     explosionAnimation;
 
@@ -53,9 +53,6 @@ class Game {
 	        this.asteroidImgs[i].src = asteroidImgSrcs[i];
 	    }
 
-	    // for (var i = 800; i < this.width; i += this.nextObstacle(2)) {
-	    //     this.obstacles.push(new Asteroid(i, Math.random()*this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5)));
-	    // }
 	    this.createObstacles();
 
 	    for(var i = 0; i<4; i++) {
@@ -68,13 +65,8 @@ class Game {
 	restart() {
 		this.gameState = 0;
 		this.shakyshake = 0;
-		this.score = {rank: -1, score: 0, time: 0, date: 0};
+		this.score = {rank: -1, score: 0, bonus: 0, time: 0, date: 0};
 		this.spacecraftImg.src = "/img/spacecraft.png";
-
-		// for (var i = 800; i < this.width; i += this.nextObstacle(2)) {
-	    //     this.obstacles.push(new Asteroid(i, Math.random()*this.height, Math.random()*60+10, Math.random()*2*Math.PI, Math.floor(Math.random()*5)));
-	    // }
-	    
 
 	    for(var i = 0; i<4; i++) {
 	    	this.rockets[i].reset();
@@ -97,8 +89,6 @@ class Game {
         this.context.drawImage(this.bgImg, bgShift, 0, this.bgImg.width, this.height);
         this.context.drawImage(this.bgImg, bgShift - this.bgImg.width, 0, this.bgImg.width, this.height);
 
-        
-
         this.createObstacles();
         this.refreshObstacles(elapsed, !this.gameState);
         this.printScore();
@@ -112,12 +102,28 @@ class Game {
         this.spacecraft.steer(this.gameState == 0 ? this.buttons | this.keys : 0, this.context, elapsed);
 		this.context.restore();
 
+		var dx = this.spacecraft.xVelocity * elapsed;
+		var deltaScore = this.getScore(dx+300)
+
+		if(dx > 0) {
+			var thrusterBonus = this.spacecraft.burnTimes;
+			for(var i = 0; i < thrusterBonus.length; i++) {
+				if(thrusterBonus[i] > 1000) {
+					this.score.bonus += deltaScore*0.1;
+				}else if(thrusterBonus[i] > 2000) {
+					this.score.bonus += deltaScore*0.2;
+				}else if(thrusterBonus[i] > 5000) {
+					this.score.bonus += deltaScore*0.4;
+				}
+			}
+		}
+
         if(!this.gameState) { // game running
         	this.score.time += elapsed/1000;
         	this.score.score = this.getScore(this.spacecraft.x);
         	this.checkGameOver();
-	        this.viewPortX += this.spacecraft.xVelocity * elapsed;
-	        this.context.translate(-this.spacecraft.xVelocity * elapsed, 0);
+	        this.viewPortX += dx;
+	        this.context.translate(-dx, 0);
 	    } else { // game over
 	    	this.explosionAnimation.drawFrame(this.spacecraft.x-this.spacecraft.radius/2, this.spacecraft.y-this.explosionAnimation.getHeight());
 	    	this.context.restore();
@@ -176,12 +182,15 @@ class Game {
 
 	checkGameOver() {
 		for (var i = 0; i < this.obstacles.length; i++) {
-            if(this.spacecraft.isColliding(this.obstacles[i])) {
+			var distance = this.spacecraft.distance(this.obstacles[i]);
+            if(distance <= 0) {
                 this.gameOver(1);
+            }else if(distance < 50) {
+            	console.log(new Date() + "close as fuck!");
             }
         }
 
-        if(this.spacecraft.y < -80 || this.spacecraft.y > this.height+80) {
+        if(this.spacecraft.y < -80 || this.spacecraft.y > this.height+80 || this.spacecraft.x < 0) {
             this.gameOver(2);
         }
 	}
@@ -191,14 +200,11 @@ class Game {
 		this.shakyshake = 1;
 		this.deathX = this.spacecraft.x;
 		this.spacecraftImg.src = "/img/spacecraft_damage3.png";
-		//this.score = {rank: -1, score: this.getScore(this.deathX), time: this.score.time, date: Date.parse(new Date())};
 		this.score.date = Date.parse(new Date());
 		this.postHighscore(this.score);
 		this.highscores.push(this.score);
 		this.highscores.sort((a, b) => b.score - a.score);
 		this.score.rank = this.highscores.findIndex((element) => element == this.score);
-		//clearInterval(this.updateInterval);
-		//setInterval(this.explosion.bind(this), 40);
 	}
 
 	drawGameOverScreen() {
@@ -237,7 +243,7 @@ class Game {
         this.context.fillStyle = "white";
         this.context.textAlign = "left";
 		this.context.textBaseline = "bottom"
-        this.context.fillText(this.getScore(this.spacecraft.x), this.spacecraft.x - this.xpos + 10, 50);
+        this.context.fillText((+this.score.score + +this.score.bonus).toFixed(2), this.spacecraft.x - this.xpos + 10, 50);
         this.context.font = "15px astrospace";
         this.context.fillText("lightyears away from home", this.spacecraft.x - this.xpos + 10, 70);
 	}

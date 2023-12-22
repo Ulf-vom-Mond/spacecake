@@ -2,6 +2,7 @@ class Thruster {
 	x;
 	y;
 	angle;
+    burnTime = 0;
 
 	constructor(x, y, angle) {
 		this.x = x;
@@ -39,4 +40,16 @@ class Thruster {
         context.stroke();
         context.restore();
 	}
+
+    addBurnTime(time) {
+        this.burnTime += time;
+    }
+
+    resetBurnTime() {
+        this.burnTime = 0;
+    }
+
+    get burnTime() {
+        return this.burnTime;
+    }
 }
